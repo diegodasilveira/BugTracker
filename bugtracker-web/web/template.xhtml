@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui">
+
+<h:head>
+	<h:outputStylesheet library="css" name="bugtracker.css"  />	
+	<title>BugTracker</title>
+</h:head>
+
+<h:body>
+
+<p:layout fullPage="true">
+
+    <p:layoutUnit position="north" size="75" resizable="false" closable="false" collapsible="false">
+    	<h:link outcome="index.xhtml" >
+    		<h:graphicImage library="images" name="logo.png" />
+    	</h:link>
+    	<h:outputText style="font-size:20px" value="Bug Tracker" />
+    </p:layoutUnit>
+
+    <p:layoutUnit position="west" size="200" resizable="true" closable="false">
+			<h:form>
+			<p:panelMenu>  
+			    <p:submenu label="Cadastros">  
+			        <p:menuitem value="Projetos" url="project.xhtml" />  
+			        <p:menuitem value="Usuários" url="user.xhtml" />  
+			        <p:menuitem value="Pendências" url="issue.xhtml" />  
+			        <p:menuitem value="Sair" action="#{loginController.processLogout}" />  
+			    </p:submenu>  
+			</p:panelMenu>
+			</h:form>			
+    </p:layoutUnit>
+
+	<ui:insert name="content" />
+
+</p:layout>
+
+</h:body>
+</html>

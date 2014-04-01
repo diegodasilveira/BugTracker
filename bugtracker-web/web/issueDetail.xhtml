@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui">
+
+<ui:composition template="template.xhtml">
+
+<ui:define name="content">
+	<p:layoutUnit position="center">
+		<h:form id="detailForm">
+	        <h:graphicImage library="images" name="bug.png" />
+	        <p:fieldset legend="#{issueDetailController.issue.title} ">  					
+	        <p:panelGrid id="issueInfo" columns="2">
+ 				<h:outputLabel for="project" value="Projeto: " />
+    			<h:outputLabel id="project" value="#{issueDetailController.issue.project.name}"/> 				
+
+ 				<h:outputLabel for="reporter" value="Criado por: " />  
+    			<h:outputLabel id="reporter" value="#{issueDetailController.issue.reporter.name}"/> 				
+
+ 				<h:outputLabel for="assignee" value="Responsável: " />  
+    			<h:outputLabel id="assignee" value="#{issueDetailController.issue.assignee.name}"/> 				
+
+ 				<h:outputLabel for="priority" value="Prioridade: " />  
+ 				<p:column>
+					<h:graphicImage title="Baixa" height="20" library="images" name="low.png" rendered="#{issueDetailController.issue.priority == 'LOW'}" />					
+					<h:graphicImage title="Média" height="20" library="images" name="medium.png" rendered="#{issueDetailController.issue.priority == 'MEDIUM'}" />					
+					<h:graphicImage title="Alta" height="20" library="images" name="high.png" rendered="#{issueDetailController.issue.priority == 'HIGH'}" />					
+	    			<h:outputLabel id="priority" value="#{issueDetailController.issue.priority.name}"/> 				
+				</p:column>
+				
+ 				<h:outputLabel for="status" value="Status: " />  
+ 				<p:column>
+					<h:graphicImage title="Aberta" height="20" library="images" name="open.png" rendered="#{issueDetailController.issue.status == 'OPEN'}" />					
+					<h:graphicImage title="Em Progresso" height="20" library="images" name="in_progress.png" rendered="#{issueDetailController.issue.status == 'IN_PROGRESS'}" />					
+					<h:graphicImage title="Fechada" height="20" library="images" name="closed.png" rendered="#{issueDetailController.issue.status == 'CLOSED'}" />					
+	    			<h:outputLabel id="status" value="#{issueDetailController.issue.status.name}"/> 				
+				</p:column>
+
+ 				<h:outputLabel for="creationDate" value="Criado em: " />  
+    			<h:outputLabel id="creationDate" value="#{issueDetailController.issue.creationDate}">
+    				<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+    			</h:outputLabel> 				
+
+ 				<h:outputLabel for="closeDate" value="Fechado em: " />  
+    			<h:outputLabel id="closeDate" value="#{issueDetailController.issue.closeDate}">
+    				<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+    			</h:outputLabel> 				
+				
+	        </p:panelGrid>
+	        </p:fieldset>
+	        
+	        <p:fieldset legend="Descrição" style="margin-top:10px">  
+    		<h:panelGrid columns="2" cellpadding="10">  
+		        <h:outputText escape="false" value="#{issueDetailController.issue.description}" />  
+		    </h:panelGrid>  
+			</p:fieldset>
+			
+	        <p:fieldset legend="#{msg.comments}" style="margin-top:10px">  
+	           <p:commandButton style="margin-bottom:10px;" icon="ui-icon-document" value="Novo" actionListener="#{issueDetailController.prepareComment}" update=":commentForm:cmtDlg" oncomplete="commentDialog.show();" title="Novo" /> 	        
+				<p:dataList  id="listComment" value="#{issueDetailController.issue.comments}" var="comment" type="definition">  
+					<p:panel header="Comentado por: #{comment.user.name}" style="border:none">
+						<h:outputLabel>#{comment.description}</h:outputLabel>
+						<br /><br />
+						<h:outputLabel value="#{comment.creationDate}">
+							<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+						</h:outputLabel>
+					</p:panel>
+				</p:dataList> 
+			</p:fieldset> 			 
+		</h:form>
+	</p:layoutUnit>
+	
+    <h:form id="commentForm">
+   		<p:dialog id="cmtDlg" header="Comentar Pendência" widgetVar="commentDialog" resizable="false" modal="true" width="350">
+	        <h:panelGrid id="projectInfo" columns="2" style="margin-bottom:10px">
+	
+	            <h:outputLabel value="Comentário:" />
+				<p:inputTextarea cols="40" rows="10" value="#{issueDetailController.comment.description}" required="true" requiredMessage="Comentário é obrigatório" />
+				
+				<p:commandButton value="Salvar" actionListener="#{issueDetailController.saveComment}" update=":detailForm:listComment,:growl" oncomplete="submitRequest(args, 'commentDialog','commentForm');" icon="ui-icon-disk"/>
+	
+	        </h:panelGrid>
+		</p:dialog>
+    </h:form>    	
+	
+	<p:growl id="growl" showDetail="false" life="3000" />	
+	
+	<script type="text/javascript">
+	    function submitRequest(args, dialogName, formName) {
+	        dialog = jQuery('#' + dialogName);
+	        
+	        if(args.validationFailed) {
+	            dialog.effect("shake", { times:3 }, 1000);
+	        } else {
+	            clearForm(formName);
+	            commentDialog.hide();
+	        }
+	    }
+	    
+	    function clearForm(formName){
+	        jQuery('#'+formName).each(function(){
+	            this.reset();
+	    	});
+	    }
+	</script>	
+</ui:define>
+
+</ui:composition>
+
+</html>

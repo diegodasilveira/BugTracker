@@ -1,0 +1,173 @@
+<ui:composition template="template.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui">
+
+<ui:define name="content">
+	<p:layoutUnit position="center">
+		<h:form id="listForm">
+			<p:dataTable  id="table" var="issue" value="#{issueController.issues}" paginator="true" paginatorPosition="bottom" rows="10">
+			  	<f:facet name="header">  
+		           Lista de pendências  
+				</f:facet>  
+
+				<p:column width="20">
+					<h:graphicImage title="Baixa" height="20" library="images" name="low.png" rendered="#{issue.priority == 'LOW'}" />					
+					<h:graphicImage title="Média" height="20" library="images" name="medium.png" rendered="#{issue.priority == 'MEDIUM'}" />					
+					<h:graphicImage title="Alta" height="20" library="images" name="high.png" rendered="#{issue.priority == 'HIGH'}" />					
+			 	</p:column>
+
+				<p:column width="20">
+					<h:graphicImage title="Aberta" height="20" library="images" name="open.png" rendered="#{issue.status == 'OPEN'}" />					
+					<h:graphicImage title="Em Progresso" height="20" library="images" name="in_progress.png" rendered="#{issue.status == 'IN_PROGRESS'}" />					
+					<h:graphicImage title="Fechada" height="20" library="images" name="closed.png" rendered="#{issue.status == 'CLOSED'}" />					
+			 	</p:column>
+			 	
+				<p:column style="text-align:left" headerText="Projeto" width="90">
+					<h:outputText value="#{issue.project.name}" />  
+			 	</p:column>			 	
+			 	
+				<p:column style="text-align:left" headerText="Criado em" width="90">
+					<h:outputText value="#{issue.creationDate}">
+						<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+					</h:outputText>  
+			 	</p:column>
+
+				<p:column style="text-align:left" headerText="Título">
+					<p:commandLink action="#{issueController.viewDetail}">
+						<h:outputText value="#{issue.title}" />  
+						<f:setPropertyActionListener value="#{issue}" target="#{issueController.issue}" />						
+					</p:commandLink>
+			 	</p:column>
+
+				<p:column style="text-align:left" headerText="Responsável" width="200">
+					<h:outputText value="#{issue.assignee.name}" />  
+			 	</p:column>
+
+			 								
+				<p:column headerText="Ações" width="50">
+                    <p:commandLink update=":editForm:edtDlg" oncomplete="editDialog.show();" title="Editar">
+	                    <h:graphicImage height="20" library="images" name="bug_edit.png" />
+	                    <f:setPropertyActionListener value="#{issue}" target="#{issueController.issue}" />
+                    </p:commandLink>				
+                   <p:commandLink update=":deleteForm:dltDlg" oncomplete="deleteDialog.show();" title="Excluir">
+	                    <h:graphicImage height="20" library="images" name="bug_delete.png" />
+	                    <f:setPropertyActionListener value="#{issue}" target="#{issueController.issue}" />
+                    </p:commandLink>	
+				</p:column>
+				
+			  	<f:facet name="footer">  
+		           <p:commandButton icon="ui-icon-document" value="Novo" actionListener="#{issueController.prepare}" update=":editForm:edtDlg" oncomplete="editDialog.show();" title="Novo" /> 
+		           <p:commandButton icon="ui-icon-search" value="Filtrar" update=":filterForm:fltDlg" oncomplete="filterDialog.show();" title="Filtrar" /> 
+				</f:facet>  			 	
+			</p:dataTable>
+		</h:form>
+	</p:layoutUnit>
+	   	
+    <h:form id="editForm">
+   		<p:dialog id="edtDlg" header="Cadastro de Pendências" widgetVar="editDialog" resizable="false" modal="true" width="600">
+	        <h:graphicImage library="images" name="bug.png" />					
+	        
+	        <h:panelGrid id="projectInfo" columns="2" style="margin-bottom:10px">
+
+	            <h:outputLabel value="Projeto:" />
+				<p:selectOneMenu id="project" converter="#{projectConverter}" style="width:200px" value="#{issueController.issue.project}" required="true" requiredMessage="Selecione um projeto">  
+					<f:selectItems value="#{issueController.projects}" var="project" itemLabel="#{project.name}" itemValue="#{project}"/>            		
+        		</p:selectOneMenu>  
+
+	            <h:outputLabel value="Responsável:" />
+				<p:selectOneMenu id="assignee" converter="#{userConverter}" style="width:200px"  value="#{issueController.issue.assignee}"  required="true" requiredMessage="Selecione um usuário">  
+					<f:selectItems value="#{issueController.users}" var="assignee" itemLabel="#{assignee.name}" itemValue="#{assignee}"/>            		
+        		</p:selectOneMenu>  	            
+        		
+        		<h:outputLabel value="Prioridade:" />
+				<p:selectOneMenu id="priority" style="width:200px" value="#{issueController.issue.priority}">  
+					<f:selectItems value="#{issueController.priorities}" var="priority" itemLabel="#{priority.name}" itemValue="#{priority}"/>            		
+        		</p:selectOneMenu>  
+        		
+	            <h:outputLabel value="Status:" />
+				<p:selectOneMenu id="status" style="width:200px"  value="#{issueController.issue.status}">  
+					<f:selectItems value="#{issueController.status}" var="status" itemLabel="#{status.name}" itemValue="#{status}"/>            		
+        		</p:selectOneMenu>          		        		
+        		        			            
+	            <h:outputLabel value="Título:" />
+	            <p:inputText style="width:97%"  id="title" value="#{issueController.issue.title}" required="true" requiredMessage="Título é obrigatório"/>
+
+	            <h:outputLabel value="Descrição:" />
+	            <p:editor id="description" value="#{issueController.issue.description}" width="485"/>
+
+				<p:commandButton value="Salvar" actionListener="#{issueController.saveIssue}" update=":listForm:table,:growl"  oncomplete="submitRequest(args, 'editDialog','editForm');" icon="ui-icon-disk"/>
+	
+	        </h:panelGrid>
+		</p:dialog>
+    </h:form>
+		
+    <h:form id="deleteForm">
+   		<p:dialog id="dltDlg" header="Exclusão de Pendência" widgetVar="deleteDialog" resizable="false" modal="true" width="400">
+	        <h:panelGrid id="projectInfo" columns="2" style="margin-bottom:10px">
+	
+	            <h:outputLabel value="Título:" />
+	            <h:outputLabel id="title" value="#{issueController.issue.title}" />
+	
+				<p:commandButton value="Excluir" actionListener="#{issueController.deleteIssue}" update=":listForm:table,:growl"  oncomplete="submitRequest(args, 'deleteDialog','deleteForm');" icon="ui-icon-trash"/>
+	
+	        </h:panelGrid>
+		</p:dialog>
+    </h:form>  		
+		
+    <h:form id="filterForm">
+   		<p:dialog id="fltDlg" header="Filtro de Pendências" widgetVar="filterDialog" resizable="false" modal="true" width="300">
+	        
+	        <h:panelGrid id="filterInfo" columns="2" style="margin-bottom:10px">
+
+	            <h:outputLabel value="Projeto:" />
+				<p:selectOneMenu id="project" converter="#{projectConverter}" style="width:200px" value="#{issueController.issueFilter.project}">  
+					<f:selectItem itemValue="#{null}" itemLabel="Selecione projeto..." noSelectionOption="true"/>
+					<f:selectItems value="#{issueController.projects}" var="project" itemLabel="#{project.name}" itemValue="#{project}"/>            		
+        		</p:selectOneMenu>  
+
+	            <h:outputLabel value="Prioridade:" />
+				<p:selectOneMenu id="priority" style="width:200px" value="#{issueController.issueFilter.priority}">  
+					<f:selectItem itemValue="#{null}" itemLabel="Selecione prioridade..." noSelectionOption="true"/>
+					<f:selectItems value="#{issueController.priorities}" var="priority" itemLabel="#{priority.name}" itemValue="#{priority}"/>            		
+        		</p:selectOneMenu>  
+        		
+	            <h:outputLabel value="Status:" />
+				<p:selectOneMenu id="status" style="width:200px"  value="#{issueController.issueFilter.status}">  
+					<f:selectItem itemValue="#{null}" itemLabel="Selecione status..." noSelectionOption="true"/>
+					<f:selectItems value="#{issueController.status}" var="status" itemLabel="#{status.name}" itemValue="#{status}"/>            		
+        		</p:selectOneMenu>          		        		
+        		        			            
+				<p:commandButton value="Filtrar" actionListener="#{issueController.findByFilter}" update=":listForm:table,:growl"  oncomplete="submitRequest(args, 'filterDialog','filterForm');" icon="ui-icon-search"/>
+				<p:commandButton value="Criteria" actionListener="#{issueController.findByFilterCriteria}" update=":listForm:table,:growl"  oncomplete="submitRequest(args, 'filterDialog','filterForm');" icon="ui-icon-search"/>
+	
+	        </h:panelGrid>
+		</p:dialog>
+    </h:form>		
+		
+	<p:growl id="growl" showDetail="false" life="3000" />	
+	
+	<script type="text/javascript">
+	    function submitRequest(args, dialogName, formName) {
+	        dialog = jQuery('#' + dialogName);
+	        
+	        if(args.validationFailed) {
+	            dialog.effect("shake", { times:3 }, 1000);
+	        } else {
+	            clearForm(formName);
+	            editDialog.hide();
+	            deleteDialog.hide();
+	            filterDialog.hide();
+	        }
+	    }
+	    
+	    function clearForm(formName){
+	        jQuery('#'+formName).each(function(){
+	            this.reset();
+	    	});
+	    }
+	</script>	
+</ui:define>
+</ui:composition>

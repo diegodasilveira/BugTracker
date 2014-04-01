@@ -1,0 +1,96 @@
+<ui:composition template="template.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui">
+
+<ui:define name="content">
+	<p:layoutUnit position="center">
+		<h:form id="listForm">
+			<p:dataTable id="table" var="user" value="#{userController.users}" paginator="true" paginatorPosition="bottom" rows="10">
+			  	<f:facet name="header">  
+		           Lista de projetos  
+				</f:facet>  
+
+				<p:column headerText="Login" width="200">
+					<h:outputText value="#{user.login}" />  
+			 	</p:column>
+			 					
+				<p:column headerText="Nome">
+					<h:outputText value="#{user.name}" />  
+			 	</p:column>
+			
+				<p:column headerText="Ações" width="50">
+                    <p:commandLink update=":editForm:edtDlg" oncomplete="editDialog.show();" title="Editar">
+	                    <h:graphicImage height="20" library="images" name="user_edit.png" />
+	                    <f:setPropertyActionListener value="#{user}" target="#{userController.user}" />
+                    </p:commandLink>				
+                   <p:commandLink update=":deleteForm:dltDlg" oncomplete="deleteDialog.show();" title="Excluir">
+	                    <h:graphicImage height="20" library="images" name="user_delete.png" />
+	                    <f:setPropertyActionListener value="#{user}" target="#{userController.user}" />
+                    </p:commandLink>	
+				</p:column>
+				
+			  	<f:facet name="footer">  
+		           <p:commandButton icon="ui-icon-document" value="Novo" actionListener="#{userController.prepare}" update=":editForm:edtDlg" oncomplete="editDialog.show();" title="Novo" /> 
+				</f:facet>  			 	
+			</p:dataTable>
+		</h:form>
+	</p:layoutUnit>
+	   	
+    <h:form id="editForm">
+   		<p:dialog id="edtDlg" header="Cadastro de Usuários" widgetVar="editDialog" resizable="false" modal="true" width="300">
+	        <h:panelGrid id="projectInfo" columns="2" style="margin-bottom:10px">
+	
+	            <h:outputLabel value="Login:" />
+	            <p:inputText id="login" value="#{userController.user.login}" required="true" requiredMessage="Login é obrigatório"/>
+
+	            <h:outputLabel value="Nome:" />
+	            <p:inputText id="name" value="#{userController.user.name}" required="true" requiredMessage="Nome é obrigatório"/>
+	
+	            <h:outputLabel value="Senha:" />
+	            <p:password redisplay="true" id="password" value="#{userController.user.password}" required="true" requiredMessage="Senha é obrigatória"/>
+
+				<p:commandButton value="Salvar" actionListener="#{userController.saveUser}" update=":listForm:table,:growl"  oncomplete="submitRequest(args, 'editDialog','editForm');" icon="ui-icon-disk"/>
+	
+	        </h:panelGrid>
+		</p:dialog>
+    </h:form>
+		
+    <h:form id="deleteForm">
+   		<p:dialog id="dltDlg" header="Exclusão de Usuário" widgetVar="deleteDialog" resizable="false" modal="true" width="300">
+	        <h:panelGrid id="projectInfo" columns="2" style="margin-bottom:10px">
+	
+	            <h:outputLabel value="Nome:" />
+	            <h:outputLabel id="nome" value="#{userController.user.name}" />
+	
+				<p:commandButton value="Excluir" actionListener="#{userController.deleteUser()}" update=":listForm:table,:growl"  oncomplete="submitRequest(args, 'deleteDialog','deleteForm');" icon="ui-icon-trash"/>
+	
+	        </h:panelGrid>
+		</p:dialog>
+    </h:form>  		
+		
+	<p:growl id="growl" showDetail="false" life="3000" />	
+	
+	<script type="text/javascript">
+	    function submitRequest(args, dialogName, formName) {
+	        dialog = jQuery('#' + dialogName);
+	        
+	        if(args.validationFailed) {
+	            dialog.effect("shake", { times:3 }, 1000);
+	        } else {
+	            clearForm(formName);
+	            editDialog.hide();
+	            deleteDialog.hide();
+	        }
+	    }
+	    
+	    function clearForm(formName){
+	        jQuery('#'+formName).each(function(){
+	            this.reset();
+	    	});
+	    }
+	</script>	
+</ui:define>
+</ui:composition>

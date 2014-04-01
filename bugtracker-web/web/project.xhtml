@@ -1,0 +1,94 @@
+<ui:composition template="template.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui">
+
+<ui:define name="content">
+	<p:layoutUnit position="center">
+		<h:form id="listForm">
+			<p:dataTable id="table" var="project" value="#{projectController.projects}" paginator="true" paginatorPosition="bottom" rows="10">
+			  	<f:facet name="header">  
+		           Lista de projetos  
+				</f:facet>  
+				
+				<p:column headerText="Nome" width="200">
+					<h:outputText value="#{project.name}" />  
+			 	</p:column>
+			
+				<p:column headerText="Data criação">
+					<h:outputText value="#{project.creationDate}">
+						<f:convertDateTime pattern="dd/MM/yyyy" />
+					</h:outputText>  
+			 	</p:column>
+			
+				<p:column headerText="Ações" width="50">
+                    <p:commandLink update=":editForm:edtDlg" oncomplete="editDialog.show();" title="Editar">
+	                    <h:graphicImage height="20" library="images" name="project_edit.png" />
+	                    <f:setPropertyActionListener value="#{project}" target="#{projectController.project}" />
+                    </p:commandLink>				
+                    <p:commandLink update=":deleteForm:dltDlg" oncomplete="deleteDialog.show();" title="Excluir">
+	                    <h:graphicImage height="20" library="images" name="project_delete.png" />
+	                    <f:setPropertyActionListener value="#{project}" target="#{projectController.project}" />
+                    </p:commandLink>				
+			 	</p:column>
+			  	<f:facet name="footer">  
+		           <p:commandButton icon="ui-icon-document" value="Novo" actionListener="#{projectController.prepare()}" update=":editForm:edtDlg" oncomplete="editDialog.show();" title="Novo" /> 
+				</f:facet>  			 	
+			</p:dataTable>
+		</h:form>
+	</p:layoutUnit>
+	   	
+    <h:form id="editForm">
+   		<p:dialog id="edtDlg" header="Cadastro de Projetos" widgetVar="editDialog" resizable="false" modal="true" width="300">
+	        <h:panelGrid id="projectInfo" columns="2" style="margin-bottom:10px">
+	
+	            <h:outputLabel value="Nome:" />
+	            <p:inputText id="nome" value="#{projectController.project.name}" required="true" requiredMessage="Nome é obrigatório"/>
+	
+	            <h:outputLabel value="Data criação:" />
+				<p:calendar value="#{projectController.project.creationDate}" id="popupButtonCal" showOn="button" required="true" requiredMessage="Data é obrigatória" />
+				
+				<p:commandButton value="Salvar" actionListener="#{projectController.saveProject()}" update=":listForm:table,:growl"  oncomplete="submitRequest(args, 'editDialog','editForm');" icon="ui-icon-disk"/>
+	
+	        </h:panelGrid>
+		</p:dialog>
+    </h:form>
+    
+    <h:form id="deleteForm">
+   		<p:dialog id="dltDlg" header="Exclusão de Projeto" widgetVar="deleteDialog" resizable="false" modal="true" width="300">
+	        <h:panelGrid id="projectInfo" columns="2" style="margin-bottom:10px">
+	
+	            <h:outputLabel value="Nome:" />
+	            <h:outputLabel id="nome" value="#{projectController.project.name}" />
+	
+				<p:commandButton value="Excluir" actionListener="#{projectController.deleteProject()}" update=":listForm:table,:growl"  oncomplete="submitRequest(args, 'deleteDialog','deleteForm');" icon="ui-icon-trash"/>
+	
+	        </h:panelGrid>
+		</p:dialog>
+    </h:form>    
+		
+	<p:growl id="growl" showDetail="false" life="3000" />	
+	
+	<script type="text/javascript">
+	    function submitRequest(args, dialogName, formName) {
+	        dialog = jQuery('#' + dialogName);
+	        
+	        if(args.validationFailed) {
+	            dialog.effect("shake", { times:3 }, 1000);
+	        } else {
+	            clearForm(formName);
+	            editDialog.hide();
+	            deleteDialog.hide();
+	        }
+	    }
+	    
+	    function clearForm(formName){
+	        jQuery('#'+formName).each(function(){
+	            this.reset();
+	    	});
+	    }
+	</script>	
+</ui:define>
+</ui:composition>
